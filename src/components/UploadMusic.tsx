@@ -2,10 +2,10 @@
 
 import { Button, Input, Stack, Typography } from "@mui/joy";
 import DoneIcon from "@mui/icons-material/Done";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import pinataSDK from "@pinata/sdk";
 import * as dotenv from "dotenv";
-import { createReadStream } from "fs";
+import { useDropzone } from "react-dropzone";
 
 import { Action, State } from "../pages";
 
@@ -39,20 +39,23 @@ export function UploadMusicInputGroup({
   const [isError, setIsError] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleLoadFile = async ({
-    target: { files },
-  }: React.ChangeEvent<HTMLInputElement>) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    // Do something with the files
     setIsUploading(true);
-    if (!files || !files[0]) {
+    if (!acceptedFiles || !acceptedFiles[0]) {
       setIsError(true);
       setIsUploading(false);
       return;
     } else {
-      console.log(files[0].name);
-      setFile(files[0]);
+      console.log(acceptedFiles[0].name);
+      setFile(acceptedFiles[0]);
       setIsUploading(false);
     }
-  };
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+  });
 
   // take the file from the input and upload it to IPFS
   const handleUploadFile = async () => {
@@ -88,12 +91,24 @@ export function UploadMusicInputGroup({
     }
   };
   return (
-    <Stack>
+    <Stack spacing={4} alignItems="flex-start" className="pt-12">
       <Typography textColor="neutral.500" fontSize="md" fontWeight="sm">
         Step 1. Upload
       </Typography>
-      <Stack direction={"row"} spacing={12} alignItems="flex-end">
-        <Input
+      <div
+        {...getRootProps()}
+        className="border-purple-500 border-dashed border-2 h-32 flex items-center justify-center w-full"
+      >
+        <input {...getInputProps()} />
+        {file ? (
+          <p>{file.name}</p>
+        ) : isDragActive ? (
+          <p>Drop the files here ...</p>
+        ) : (
+          <p>Drag and drop some files here, or click to select files</p>
+        )}
+      </div>
+      {/* <Input
           type="file"
           size="lg"
           variant="solid"
@@ -119,8 +134,8 @@ export function UploadMusicInputGroup({
             alignItems: "center",
             justifyContent: "center",
           }}
-        />
-      </Stack>
+        />*/}
+
       {isError && <Typography color="danger">Something went wrong</Typography>}
     </Stack>
   );
