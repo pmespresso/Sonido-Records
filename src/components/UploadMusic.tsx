@@ -7,7 +7,7 @@ import pinataSDK from "@pinata/sdk";
 import * as dotenv from "dotenv";
 import { useDropzone } from "react-dropzone";
 
-import { Action, State } from "../pages";
+import { Action, State } from "../state";
 
 dotenv.config();
 
