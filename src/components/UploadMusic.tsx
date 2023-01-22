@@ -1,13 +1,13 @@
 // react component that lets user upload music files to IPFS
 
-import { Button, Input, Stack, Typography } from "@mui/joy";
-import DoneIcon from "@mui/icons-material/Done";
+import { Stack, Typography } from "@mui/joy";
 import { useCallback, useState } from "react";
 import pinataSDK from "@pinata/sdk";
 import * as dotenv from "dotenv";
 import { useDropzone } from "react-dropzone";
 
 import { Action, State } from "../state";
+import { SubHeading } from "./SubHeading";
 
 dotenv.config();
 
@@ -91,10 +91,8 @@ export function UploadMusicInputGroup({
     }
   };
   return (
-    <Stack spacing={4} alignItems="flex-start" className="pt-12">
-      <Typography textColor="neutral.500" fontSize="md" fontWeight="sm">
-        Step 1. Upload
-      </Typography>
+    <Stack spacing={4} alignItems="flex-start">
+      <SubHeading text={"1. Upload Music"} />
       <div
         {...getRootProps()}
         className="border-purple-500 border-dashed border-2 h-32 flex items-center justify-center w-full"
@@ -108,34 +106,6 @@ export function UploadMusicInputGroup({
           <p>Drag and drop some files here, or click to select files</p>
         )}
       </div>
-      {/* <Input
-          type="file"
-          size="lg"
-          variant="solid"
-          onChange={handleLoadFile}
-          endDecorator={
-            <Button
-              loading={isUploading}
-              color="info"
-              size="lg"
-              variant="outlined"
-              onClick={handleUploadFile}
-              disabled={!file}
-              style={{
-                height: 50,
-              }}
-            >
-              {isSuccess ? <DoneIcon /> : "Upload"}
-            </Button>
-          }
-          style={{
-            backgroundColor: "#fff",
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        />*/}
-
       {isError && <Typography color="danger">Something went wrong</Typography>}
     </Stack>
   );

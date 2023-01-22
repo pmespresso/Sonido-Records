@@ -1,6 +1,7 @@
 // react component that lets user upload music files to IPFS
 import { Input, Stack, Typography } from "@mui/joy";
-import { Action, State } from "../pages";
+import { Action, State } from "../state";
+import { SubHeading } from "./SubHeading";
 
 export function SongEditionInput({
   state,
@@ -11,9 +12,7 @@ export function SongEditionInput({
 }) {
   return (
     <Stack>
-      <Typography textColor="neutral.500" fontSize="md" fontWeight="sm">
-        Step 2. Fill in the Details (Metadata)
-      </Typography>
+      <SubHeading text={"2. Fill in the Details (Metadata)"} />
       <Stack direction={"row"} spacing={4}>
         <Stack direction="column" spacing={2}>
           <Input

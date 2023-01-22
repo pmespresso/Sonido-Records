@@ -1,11 +1,10 @@
 import { Stack, Typography } from "@mui/joy";
+import { SubHeading } from "./SubHeading";
 
 export function Review() {
   return (
     <Stack>
-      <Typography textColor="neutral.500" fontSize="md" fontWeight="sm">
-        Step 4. Review
-      </Typography>
+      <SubHeading text="Step 4. Review" />
     </Stack>
   );
 }

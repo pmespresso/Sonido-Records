@@ -1,11 +1,14 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Stack from "@mui/joy/Stack";
 import { makeStyles } from "@mui/styles";
-import { Button, Grid, Sheet, Typography } from "@mui/joy";
+import { Button, Grid, Sheet } from "@mui/joy";
 import Image from "mui-image";
 import { useAccount } from "wagmi";
 
 import bg1 from "../images/bg_1.png";
+import bg2 from "../images/bg_2.png";
+import bg3 from "../images/bg_3.png";
+import bg4 from "../images/bg_4.png";
 import { useSound } from "../hooks/useSound";
 import { Reducer, useReducer } from "react";
 import { UploadMusicInputGroup } from "../components/UploadMusic";
@@ -107,7 +110,17 @@ function Page() {
       </Grid>
       <Grid lg={8}>
         <Image
-          src={bg1.src}
+          src={
+            state.step == 0
+              ? bg1.src
+              : state.step == 1
+              ? bg2.src
+              : state.step == 2
+              ? bg3.src
+              : state.step == 3
+              ? bg4.src
+              : ""
+          }
           alt="bg_1.png"
           height="100vh"
           width="100%"

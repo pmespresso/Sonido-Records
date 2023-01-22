@@ -1,3 +1,11 @@
+export enum MinterType {
+  EDITION_MAX_MINTER,
+  RANGE_MINTER,
+  MERKLE_DROP_MINTER,
+  FIXED_PRICE_SIGNATURE_MINTER,
+  NULL,
+}
+
 export type State = {
   songName: string;
   songSymbol: string;
@@ -10,6 +18,7 @@ export type State = {
   editionCutoffTime: number;
   flags: number;
   step: number;
+  minter: MinterType;
 };
 
 export type Action =
@@ -24,10 +33,11 @@ export type Action =
   | { type: "SET_EDITION_CUTOFF_TIME"; payload: number }
   | { type: "SET_FLAGS"; payload: number }
   | { type: "STEP_FORWARD" }
-  | { type: "STEP_BACKWARD" };
+  | { type: "STEP_BACKWARD" }
+  | { type: "SELECT_MINTER"; payload: MinterType };
 
 export const initialState = {
-  step: 0,
+  step: 2,
   songName: "",
   songSymbol: "",
   metadataModule: "",
@@ -38,6 +48,7 @@ export const initialState = {
   editionMaxMintable: 0,
   editionCutoffTime: 0,
   flags: 0,
+  minter: MinterType.NULL,
 };
 
 export const reducer = (state: State, action: Action) => {
@@ -66,6 +77,8 @@ export const reducer = (state: State, action: Action) => {
       return { ...state, step: state.step + 1 };
     case "STEP_BACKWARD":
       return { ...state, step: state.step - 1 };
+    case "SELECT_MINTER":
+      return { ...state, minter: action.payload };
     default:
       return state;
   }
