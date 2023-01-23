@@ -5,10 +5,10 @@ import { Button, Grid, Sheet } from "@mui/joy";
 import { useContext } from "react";
 import Image from "mui-image";
 
-import bg1 from "../images/bg_1.png";
-import bg2 from "../images/bg_2.png";
-import bg3 from "../images/bg_3.png";
-import bg4 from "../images/bg_4.png";
+import bg1 from "../../public/images/bg_1.png";
+import bg2 from "../../public/images/bg_2.png";
+import bg3 from "../../public/images/bg_3.png";
+import bg4 from "../../public/images/bg_4.png";
 import { UploadMusicInputGroup } from "../components/UploadMusic";
 import { SongEditionInput } from "../components/SongEditionInput";
 import { SelectMinter } from "../components/SelectMinter";
