@@ -1,18 +1,15 @@
 // react component that lets user upload music files to IPFS
-import { Input, Stack, Typography } from "@mui/joy";
-import { Action, State } from "../state";
+import { Input, Stack } from "@mui/joy";
+import { useContext } from "react";
+
+import { AppContext } from "../contexts/AppContext";
 import { SubHeading } from "./SubHeading";
 
-export function SongEditionInput({
-  state,
-  dispatch,
-}: {
-  state: State;
-  dispatch: React.Dispatch<Action>;
-}) {
+export function SongEditionInput() {
+  const { state, dispatch } = useContext(AppContext);
   return (
     <Stack>
-      <SubHeading text={"2. Fill in the Details (Metadata)"} />
+      <SubHeading text={"2. Song Edition Details"} />
       <Stack direction={"row"} spacing={4}>
         <Stack direction="column" spacing={2}>
           <Input
@@ -81,8 +78,9 @@ export function SongEditionInput({
           <Input
             variant="outlined"
             value={state.editionMaxMintable}
-            placeholder={"Edition Max Mintable"}
+            title={"Edition Max Mintable"}
             type="number"
+            placeholder={"Edition Max Mintable"}
             onChange={({ target: { value } }) => {
               dispatch({
                 type: "SET_EDITION_MAX_MINTABLE",

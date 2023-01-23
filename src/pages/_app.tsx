@@ -8,6 +8,7 @@ import { WagmiConfig } from "wagmi";
 
 import "../styles/tailwind.css";
 import { chains, client } from "../wagmi";
+import { AppContextProvider } from "../contexts/AppContext";
 
 function App({ Component, pageProps }: AppProps) {
   const [mounted, setMounted] = React.useState(false);
@@ -20,7 +21,11 @@ function App({ Component, pageProps }: AppProps) {
             <title>Sonido Propose</title>
           </NextHead>
 
-          {mounted && <Component {...pageProps} />}
+          {mounted && (
+            <AppContextProvider>
+              <Component {...pageProps} />
+            </AppContextProvider>
+          )}
         </CssVarsProvider>
       </RainbowKitProvider>
     </WagmiConfig>

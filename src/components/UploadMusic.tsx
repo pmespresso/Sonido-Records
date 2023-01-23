@@ -1,13 +1,14 @@
 // react component that lets user upload music files to IPFS
 
 import { Stack, Typography } from "@mui/joy";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import pinataSDK from "@pinata/sdk";
 import * as dotenv from "dotenv";
 import { useDropzone } from "react-dropzone";
 
 import { Action, State } from "../state";
 import { SubHeading } from "./SubHeading";
+import { AppContext } from "../contexts/AppContext";
 
 dotenv.config();
 
@@ -27,13 +28,8 @@ pinata
     console.log(err);
   });
 
-export function UploadMusicInputGroup({
-  state,
-  dispatch,
-}: {
-  state: State;
-  dispatch: React.Dispatch<Action>;
-}) {
+export function UploadMusicInputGroup() {
+  const { state, dispatch } = useContext(AppContext);
   const [file, setFile] = useState<File>();
   const [isUploading, setIsUploading] = useState(false);
   const [isError, setIsError] = useState(false);

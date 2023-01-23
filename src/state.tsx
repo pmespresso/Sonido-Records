@@ -1,10 +1,4 @@
-export enum MinterType {
-  EDITION_MAX_MINTER,
-  RANGE_MINTER,
-  MERKLE_DROP_MINTER,
-  FIXED_PRICE_SIGNATURE_MINTER,
-  NULL,
-}
+import { MinterType } from "./types";
 
 export type State = {
   songName: string;
@@ -36,18 +30,33 @@ export type Action =
   | { type: "STEP_BACKWARD" }
   | { type: "SELECT_MINTER"; payload: MinterType };
 
+const SONG_NAME = "Never Gonna Give You Up";
+const SONG_SYMBOL = "NEVER";
+const METADATA_MODULE = "390720730";
+const BASE_URI = "https://example.com/metadata/";
+const CONTRACT_URI = "https://example.com/storefront/";
+const FUNDING_RECIPIENT = "0xbbfb154C1ff9df449707819CC3d251C7B1DCCaDE";
+const ROYALTY_BPS = 100;
+const ARTIST_ADMIN = "0xbbfb154C1ff9df449707819CC3d251C7B1DCCaDE";
+const EDITION_MAX_MINTABLE = 1000;
+const EDITION_CUTOFF_TIME = 200;
+const FLAGS = 2;
+// const SOUND_FEE_ADDRESS = address(2222222222);
+// const PLATFORM_FEE_BPS = 200;
+// const MAX_BPS = 10_000;
+
 export const initialState = {
   step: 2,
-  songName: "",
-  songSymbol: "",
-  metadataModule: "",
-  baseUri: "",
-  contractUri: "",
-  fundingRecipient: "",
-  royaltyBps: 0,
-  editionMaxMintable: 0,
-  editionCutoffTime: 0,
-  flags: 0,
+  songName: SONG_NAME,
+  songSymbol: SONG_SYMBOL,
+  metadataModule: METADATA_MODULE,
+  baseUri: BASE_URI,
+  contractUri: CONTRACT_URI,
+  fundingRecipient: FUNDING_RECIPIENT,
+  royaltyBps: ROYALTY_BPS,
+  editionMaxMintable: EDITION_MAX_MINTABLE,
+  editionCutoffTime: EDITION_CUTOFF_TIME,
+  flags: FLAGS,
   minter: MinterType.NULL,
 };
 

@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Card, CardContent, Stack, Typography } from "@mui/joy";
 import DoneIcon from "@mui/icons-material/Done";
 
-import { Action, MinterType, State } from "../state";
 import { SubHeading } from "./SubHeading";
+import { MinterType } from "../types";
+import { AppContext } from "../contexts/AppContext";
 
 function MinterOption({
   title,
@@ -39,13 +40,9 @@ function MinterOption({
   );
 }
 
-export function SelectMinter({
-  state,
-  dispatch,
-}: {
-  state: State;
-  dispatch: React.Dispatch<Action>;
-}) {
+export function SelectMinter() {
+  const { state, dispatch } = useContext(AppContext);
+
   return (
     <Stack>
       <SubHeading text={"3. Configure Minter"} />

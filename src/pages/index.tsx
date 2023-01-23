@@ -2,23 +2,20 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Stack from "@mui/joy/Stack";
 import { makeStyles } from "@mui/styles";
 import { Button, Grid, Sheet } from "@mui/joy";
+import { useContext } from "react";
 import Image from "mui-image";
-import { useAccount } from "wagmi";
 
 import bg1 from "../images/bg_1.png";
 import bg2 from "../images/bg_2.png";
 import bg3 from "../images/bg_3.png";
 import bg4 from "../images/bg_4.png";
-import { useSound } from "../hooks/useSound";
-import { Reducer, useReducer } from "react";
 import { UploadMusicInputGroup } from "../components/UploadMusic";
 import { SongEditionInput } from "../components/SongEditionInput";
 import { SelectMinter } from "../components/SelectMinter";
-import { Action, initialState, reducer, State } from "../state";
 import { Heading } from "../components/Heading";
 import { Review } from "../components/Review";
+import { AppContext } from "../contexts/AppContext";
 
-// @ts-ignore
 const useStyles = makeStyles({
   activityArea: {
     padding: "20px 20px",
@@ -33,14 +30,8 @@ const useStyles = makeStyles({
 });
 
 function Page() {
-  const { isConnected } = useAccount();
   const classes = useStyles();
-  const client = useSound();
-
-  const [state, dispatch] = useReducer<Reducer<State, Action>>(
-    reducer,
-    initialState
-  );
+  const { state, dispatch } = useContext(AppContext);
 
   const handleBack = () => {
     if (state.step > 0) {
@@ -54,6 +45,10 @@ function Page() {
     }
   };
 
+  const handleSubmit = () => {
+    // dispatch({ type: "SUBMIT" });
+  };
+
   return (
     <Grid container spacing={2} columns={12} sx={{ flexGrow: 1 }}>
       <Grid lg={4}>
@@ -65,11 +60,11 @@ function Page() {
             <Sheet>
               <Heading />
               {state.step === 0 ? (
-                <UploadMusicInputGroup state={state} dispatch={dispatch} />
+                <UploadMusicInputGroup />
               ) : state.step == 1 ? (
-                <SongEditionInput state={state} dispatch={dispatch} />
+                <SongEditionInput />
               ) : state.step == 2 ? (
-                <SelectMinter state={state} dispatch={dispatch} />
+                <SelectMinter />
               ) : state.step == 3 ? (
                 <Review />
               ) : null}
@@ -95,16 +90,28 @@ function Page() {
               <div></div>
             )}
 
-            <Button
-              color="info"
-              variant="outlined"
-              fullWidth={false}
-              size={"md"}
-              endDecorator={state.step == 3 ? "🔥" : null}
-              onClick={handleNext}
-            >
-              {state.step == 3 ? "Submit" : "Next"}
-            </Button>
+            {state.step == 3 ? (
+              <Button
+                color="info"
+                variant="outlined"
+                fullWidth={false}
+                size={"md"}
+                endDecorator={"🔥"}
+                onClick={handleSubmit}
+              >
+                Submit
+              </Button>
+            ) : (
+              <Button
+                color="info"
+                variant="outlined"
+                fullWidth={false}
+                size={"md"}
+                onClick={handleNext}
+              >
+                Next
+              </Button>
+            )}
           </Stack>
         </Sheet>
       </Grid>
