@@ -66,7 +66,9 @@ export const initialState = {
   editionCutoffTime: EDITION_CUTOFF_TIME,
   flags: FLAGS,
   minter: MinterType.NULL,
-  proposalByteCode: "",
+  proposalBytecode: "",
+  generatingProposalBytecode: false,
+  submittingProposal: false,
 };
 
 export const reducer = (state: State, action: Action) => {
