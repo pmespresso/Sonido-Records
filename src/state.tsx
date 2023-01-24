@@ -32,7 +32,7 @@ export type Action =
 
 const SONG_NAME = "Never Gonna Give You Up";
 const SONG_SYMBOL = "NEVER";
-const METADATA_MODULE = "390720730";
+const METADATA_MODULE = "0x3ca50e8da8c3d359fc934aea0161f5346ccb62a1";
 const BASE_URI = "https://example.com/metadata/";
 const CONTRACT_URI = "https://example.com/storefront/";
 const FUNDING_RECIPIENT = "0xbbfb154C1ff9df449707819CC3d251C7B1DCCaDE";
@@ -46,7 +46,7 @@ const FLAGS = 2;
 // const MAX_BPS = 10_000;
 
 export const initialState = {
-  step: 2,
+  step: 3,
   songName: SONG_NAME,
   songSymbol: SONG_SYMBOL,
   metadataModule: METADATA_MODULE,

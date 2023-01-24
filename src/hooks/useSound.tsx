@@ -1,31 +1,76 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
-import { EditionConfig, MintConfig, SoundClient } from "@soundxyz/sdk";
+import { useAccount, useSigner } from "wagmi";
+import { isAddress } from "@ethersproject/address";
+import {
+  ContractCall,
+  EditionConfig,
+  MintConfig,
+  SoundClient,
+} from "@soundxyz/sdk";
 import { contractAddresses } from "@soundxyz/sound-protocol";
+import {
+  IMinterModule__factory,
+  MerkleDropMinter__factory,
+  RangeEditionMinter__factory,
+  SoundCreatorV1__factory,
+  SoundEditionV1_1__factory,
+} from "@soundxyz/sound-protocol/typechain/index";
 import { AppContext } from "../contexts/AppContext";
 import { MinterType } from "../types";
+import { Overrides } from "ethers";
+import { getSaltAsBytes32 } from "../utils/helpers";
+import { editionInitFlags, MINTER_ROLE } from "@soundxyz/sdk/utils/constants";
 
-export const useSound = () => {
-  const { connector } = useAccount();
+interface OptionalOverrides {
+  gasLimit?: number;
+  maxFeePerGas?: number;
+  maxPriorityFeePerGas?: number;
+}
+
+export const useSound = ({
+  gasLimit = undefined,
+  maxFeePerGas = undefined,
+  maxPriorityFeePerGas = undefined,
+}: OptionalOverrides) => {
+  const { address, connector } = useAccount();
+  const { data: signer } = useSigner();
   const { state } = useContext(AppContext);
   const [client, setClient] = useState<SoundClient>();
+  const [soundCreatorAddress, setSoundCreatorAddress] = useState<string>();
 
   useEffect(() => {
-    async function initSigner() {
-      const signer = await connector?.getSigner();
+    async function initSoundClient() {
+      if (!connector) return;
+      if (!signer) return;
+
+      // check chainid and set soundCreatorAddress dpeending if it's mainnet or goerli
+      const chainId = await connector.getChainId();
+      if (chainId === 1) {
+        setSoundCreatorAddress(contractAddresses.mainnet.soundCreatorV1);
+      } else if (chainId === 5) {
+        setSoundCreatorAddress(contractAddresses.goerli.soundCreatorV1);
+      } else {
+        throw new Error("Unsupported chainId");
+      }
+
       const _client = SoundClient({
         signer,
         soundCreatorAddress: contractAddresses.mainnet.soundCreatorV1,
       });
+
       setClient(_client);
     }
-    initSigner();
-  }, [connector]);
+
+    initSoundClient();
+  }, [connector, signer]);
 
   const generateProposalPayload = async () => {
     if (!client) return;
+    if (!address) return;
+    if (!signer) return;
+    if (!soundCreatorAddress) return;
 
-    const salt = "0x" + Math.random().toString(16).slice(2);
+    const customSalt = "0x" + Math.random().toString(16).slice(2);
 
     const editionConfig: EditionConfig = {
       name: state.songName,
@@ -63,14 +108,128 @@ export const useSound = () => {
       default:
         break;
     }
-    // Transaction
-    const transaction = await client.createEdition({
-      editionConfig,
-      mintConfigs,
-      salt,
-    });
 
-    return transaction.raw;
+    // Transaction
+    const txnOverrides: Overrides = {
+      gasLimit,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    };
+
+    const formattedSalt = getSaltAsBytes32(
+      customSalt || Math.random() * 1_000_000_000_000_000
+    );
+
+    // Precompute the edition address.
+    const [editionAddress, _] = await SoundCreatorV1__factory.connect(
+      soundCreatorAddress,
+      signer
+    ).soundEditionAddress(address, formattedSalt);
+
+    console.log("Precompute Edition Address ", editionAddress);
+
+    const editionInterface = SoundEditionV1_1__factory.createInterface();
+
+    /**
+     * Encode all the bundled contract calls.
+     */
+    const contractCalls: ContractCall[] = [];
+
+    // Grant MINTER_ROLE for each minter.
+    const mintersToGrantRole = Array.from(
+      new Set(mintConfigs.map((m) => m.minterAddress))
+    );
+    for (const minterAddress of mintersToGrantRole) {
+      contractCalls.push({
+        contractAddress: editionAddress,
+        calldata: editionInterface.encodeFunctionData("grantRoles", [
+          minterAddress,
+          MINTER_ROLE,
+        ]),
+      });
+    }
+    // Add the createEditionMint calls.
+    for (const mintConfig of mintConfigs) {
+      /**
+       * Set up the createEditionMint call for each mint config.
+       */
+      switch (mintConfig.mintType) {
+        case "RangeEdition": {
+          const minterInterface = RangeEditionMinter__factory.createInterface();
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+
+            calldata: minterInterface.encodeFunctionData("createEditionMint", [
+              editionAddress,
+              mintConfig.price,
+              Math.floor(mintConfig.startTime),
+              Math.floor(mintConfig.cutoffTime),
+              Math.floor(mintConfig.endTime),
+              mintConfig.affiliateFeeBPS,
+              Math.floor(mintConfig.maxMintableLower),
+              Math.floor(mintConfig.maxMintableUpper),
+              Math.floor(mintConfig.maxMintablePerAccount),
+            ]),
+          });
+          break;
+        }
+        case "MerkleDrop": {
+          const minterInterface = MerkleDropMinter__factory.createInterface();
+          contractCalls.push({
+            contractAddress: mintConfig.minterAddress,
+            calldata: minterInterface.encodeFunctionData("createEditionMint", [
+              editionAddress,
+              mintConfig.merkleRoot,
+              mintConfig.price,
+              Math.floor(mintConfig.startTime),
+              Math.floor(mintConfig.endTime),
+              mintConfig.affiliateFeeBPS,
+              Math.floor(mintConfig.maxMintable),
+              Math.floor(mintConfig.maxMintablePerAccount),
+            ]),
+          });
+          break;
+        }
+      }
+    }
+
+    let flags = 0;
+    if (editionConfig.shouldFreezeMetadata)
+      flags |= editionInitFlags.METADATA_IS_FROZEN;
+    if (editionConfig.shouldEnableMintRandomness)
+      flags |= editionInitFlags.MINT_RANDOMNESS_ENABLED;
+    if (editionConfig.enableOperatorFiltering)
+      flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED;
+
+    /**
+     * Encode the SoundEdition.initialize call.
+     */
+    const editionInitData = editionInterface.encodeFunctionData("initialize", [
+      editionConfig.name,
+      editionConfig.symbol,
+      editionConfig.metadataModule,
+      editionConfig.baseURI,
+      editionConfig.contractURI,
+      editionConfig.fundingRecipient,
+      editionConfig.royaltyBPS,
+      Math.floor(editionConfig.editionMaxMintableLower),
+      Math.floor(editionConfig.editionMaxMintableUpper),
+      Math.floor(editionConfig.editionCutoffTime),
+      flags,
+    ]);
+
+    const soundCreatorContract = SoundCreatorV1__factory.connect(
+      soundCreatorAddress,
+      signer
+    );
+
+    soundCreatorContract.createSoundAndMints(
+      formattedSalt,
+      editionInitData,
+      contractCalls.map((d) => d.contractAddress),
+      contractCalls.map((d) => d.calldata),
+      txnOverrides
+    );
   };
 
   return { client, generateProposalPayload };

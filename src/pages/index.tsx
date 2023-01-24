@@ -15,6 +15,7 @@ import { SelectMinter } from "../components/SelectMinter";
 import { Heading } from "../components/Heading";
 import { Review } from "../components/Review";
 import { AppContext } from "../contexts/AppContext";
+import { useSound } from "../hooks/useSound";
 
 const useStyles = makeStyles({
   activityArea: {
@@ -31,6 +32,7 @@ const useStyles = makeStyles({
 
 function Page() {
   const classes = useStyles();
+  const { generateProposalPayload } = useSound();
   const { state, dispatch } = useContext(AppContext);
 
   const handleBack = () => {
@@ -46,6 +48,7 @@ function Page() {
   };
 
   const handleSubmit = () => {
+    generateProposalPayload();
     // dispatch({ type: "SUBMIT" });
   };
 
