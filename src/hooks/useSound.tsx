@@ -135,6 +135,7 @@ export const useSound = ({
      */
     const contractCalls: ContractCall[] = [];
 
+    console.log("Grant Roles");
     // Grant MINTER_ROLE for each minter.
     const mintersToGrantRole = Array.from(
       new Set(mintConfigs.map((m) => m.minterAddress))
@@ -148,6 +149,7 @@ export const useSound = ({
         ]),
       });
     }
+
     // Add the createEditionMint calls.
     for (const mintConfig of mintConfigs) {
       /**
@@ -201,6 +203,7 @@ export const useSound = ({
     if (editionConfig.enableOperatorFiltering)
       flags |= editionInitFlags.OPERATOR_FILTERING_ENABLED;
 
+    console.log("encode Initialize for edition ");
     /**
      * Encode the SoundEdition.initialize call.
      */
@@ -218,18 +221,32 @@ export const useSound = ({
       flags,
     ]);
 
+    console.log("connect sound creator contract");
     const soundCreatorContract = SoundCreatorV1__factory.connect(
       soundCreatorAddress,
       signer
     );
 
-    soundCreatorContract.createSoundAndMints(
-      formattedSalt,
-      editionInitData,
-      contractCalls.map((d) => d.contractAddress),
-      contractCalls.map((d) => d.calldata),
-      txnOverrides
+    // soundCreatorContract.createSoundAndMints(
+    //   formattedSalt,
+    //   editionInitData,
+    //   contractCalls.map((d) => d.contractAddress),
+    //   contractCalls.map((d) => d.calldata),
+    //   txnOverrides
+    // );
+    const bytecode = soundCreatorContract.interface.encodeFunctionData(
+      "createSoundAndMints",
+      [
+        formattedSalt,
+        editionInitData,
+        contractCalls.map((d) => d.contractAddress),
+        contractCalls.map((d) => d.calldata),
+      ]
     );
+
+    console.log("createSoundAndMints bytecode ", bytecode);
+
+    return bytecode;
   };
 
   return { client, generateProposalPayload };

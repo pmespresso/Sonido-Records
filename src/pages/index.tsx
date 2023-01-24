@@ -32,7 +32,7 @@ const useStyles = makeStyles({
 
 function Page() {
   const classes = useStyles();
-  const { generateProposalPayload } = useSound();
+  const { generateProposalPayload } = useSound({});
   const { state, dispatch } = useContext(AppContext);
 
   const handleBack = () => {
