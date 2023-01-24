@@ -34,7 +34,7 @@ export const useSound = ({
 }: OptionalOverrides) => {
   const { address, connector } = useAccount();
   const { data: signer } = useSigner();
-  const { state } = useContext(AppContext);
+  const { dispatch, state } = useContext(AppContext);
   const [client, setClient] = useState<SoundClient>();
   const [soundCreatorAddress, setSoundCreatorAddress] = useState<string>();
 
@@ -69,6 +69,8 @@ export const useSound = ({
     if (!address) return;
     if (!signer) return;
     if (!soundCreatorAddress) return;
+
+    dispatch({ type: "GENERATE_BYTECODE" });
 
     const customSalt = "0x" + Math.random().toString(16).slice(2);
 
@@ -227,13 +229,6 @@ export const useSound = ({
       signer
     );
 
-    // soundCreatorContract.createSoundAndMints(
-    //   formattedSalt,
-    //   editionInitData,
-    //   contractCalls.map((d) => d.contractAddress),
-    //   contractCalls.map((d) => d.calldata),
-    //   txnOverrides
-    // );
     const bytecode = soundCreatorContract.interface.encodeFunctionData(
       "createSoundAndMints",
       [
@@ -245,6 +240,8 @@ export const useSound = ({
     );
 
     console.log("createSoundAndMints bytecode ", bytecode);
+
+    dispatch({ type: "SET_PROPOSAL_BYTECODE", payload: bytecode });
 
     return bytecode;
   };

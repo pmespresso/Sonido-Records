@@ -1,6 +1,11 @@
 import { MinterType } from "./types";
 
-export type State = {
+export type LoadingState = {
+  generatingProposalBytecode: boolean;
+  submittingProposal: boolean;
+};
+
+export interface State extends LoadingState {
   songName: string;
   songSymbol: string;
   metadataModule: string;
@@ -13,7 +18,8 @@ export type State = {
   flags: number;
   step: number;
   minter: MinterType;
-};
+  proposalBytecode: string;
+}
 
 export type Action =
   | { type: "SET_SONG_NAME"; payload: string }
@@ -28,6 +34,8 @@ export type Action =
   | { type: "SET_FLAGS"; payload: number }
   | { type: "STEP_FORWARD" }
   | { type: "STEP_BACKWARD" }
+  | { type: "GENERATE_BYTECODE" }
+  | { type: "SET_PROPOSAL_BYTECODE"; payload: string }
   | { type: "SELECT_MINTER"; payload: MinterType };
 
 const SONG_NAME = "Never Gonna Give You Up";
@@ -58,6 +66,7 @@ export const initialState = {
   editionCutoffTime: EDITION_CUTOFF_TIME,
   flags: FLAGS,
   minter: MinterType.NULL,
+  proposalByteCode: "",
 };
 
 export const reducer = (state: State, action: Action) => {
@@ -86,6 +95,14 @@ export const reducer = (state: State, action: Action) => {
       return { ...state, step: state.step + 1 };
     case "STEP_BACKWARD":
       return { ...state, step: state.step - 1 };
+    case "GENERATE_BYTECODE":
+      return { ...state, generatingProposalBytecode: true };
+    case "SET_PROPOSAL_BYTECODE":
+      return {
+        ...state,
+        generatingProposalBytecode: false,
+        proposalBytecode: action.payload,
+      };
     case "SELECT_MINTER":
       return { ...state, minter: action.payload };
     default:
