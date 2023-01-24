@@ -54,7 +54,7 @@ const FLAGS = 2;
 // const MAX_BPS = 10_000;
 
 export const initialState = {
-  step: 3,
+  step: 0,
   songName: SONG_NAME,
   songSymbol: SONG_SYMBOL,
   metadataModule: METADATA_MODULE,
